@@ -1,6 +1,6 @@
 name: War
 main: bukkit.tommytony.war.War
-version: 0.3
+version: 0.3.001
 commands:
 
 #-Player commands-

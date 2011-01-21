@@ -48,11 +48,39 @@ public class Team {
 		int x = teamSpawn.getBlockX();
 		int y = teamSpawn.getBlockY();
 		int z = teamSpawn.getBlockZ();
-		this.volume.setCornerOne(warzone.getWorld().getBlockAt(x-2, y-1, z-2));
-		this.volume.setCornerTwo(warzone.getWorld().getBlockAt(x+2, y+5, z+2));
+		if(warzone.hasMonument()){
+			this.volume.setCornerOne(warzone.getWorld().getBlockAt(x-2, y-1, z-2));
+			this.volume.setCornerTwo(warzone.getWorld().getBlockAt(x+2, y+4, z+2));
+		} else {
+			this.volume.setCornerOne(warzone.getWorld().getBlockAt(x-1, y-1, z-1));
+			this.volume.setCornerTwo(warzone.getWorld().getBlockAt(x+1, y-1, z+1));
+		}
 	}
 	
 	private void initializeTeamSpawn(Location teamSpawn) {
+		// make air
+		this.volume.setToMaterial(Material.AIR);
+		
+		// Set the spawn 
+		int x = teamSpawn.getBlockX();
+		int y = teamSpawn.getBlockY();
+		int z = teamSpawn.getBlockZ();
+		
+		// first ring
+		warzone.getWorld().getBlockAt(x+1, y-1, z+1).setType(material);
+		warzone.getWorld().getBlockAt(x+1, y-1, z).setType(material);
+		warzone.getWorld().getBlockAt(x+1, y-1, z-1).setType(material);
+		warzone.getWorld().getBlockAt(x, y-1, z+1).setType(material);
+		warzone.getWorld().getBlockAt(x, y-1, z).setType(Material.GLOWSTONE);
+		warzone.getWorld().getBlockAt(x, y-1, z-1).setType(material);
+		warzone.getWorld().getBlockAt(x-1, y-1, z+1).setType(material);
+		warzone.getWorld().getBlockAt(x-1, y-1, z).setType(material);
+		warzone.getWorld().getBlockAt(x-1, y-1, z-1).setType(material);
+		
+		resetSign();
+	}
+	
+	private void initializeTeamSpawnMonument(Location teamSpawn) {
 		// make air
 		this.volume.setToMaterial(Material.AIR);
 		
@@ -136,7 +164,11 @@ public class Team {
 		this.setVolume();
 		getVolume().saveBlocks();
 		
-		initializeTeamSpawn(teamSpawn);
+		if(warzone.hasMonument()){
+			initializeTeamSpawnMonument(teamSpawn);
+		} else {
+			initializeTeamSpawn(teamSpawn);
+		}
 	}
 	
 	public Location getTeamSpawn() {
@@ -201,6 +233,38 @@ public class Team {
 	}
 	
 	public void resetSign(){
+		if(warzone.hasMonument()){
+			resetSignMonument();
+		} else {
+			resetSignTeam();
+		}
+	}
+
+	public void resetSignTeam(){
+		int x = teamSpawn.getBlockX();
+		int y = teamSpawn.getBlockY();
+		int z = teamSpawn.getBlockZ();
+		
+		Block block = warzone.getWorld().getBlockAt(x, y, z);
+		if(block.getType() != Material.SIGN_POST) block.setType(Material.SIGN_POST);
+		block.setData((byte)8);
+		
+		BlockState state = block.getState();
+		if(state instanceof Sign) {
+			Sign sign = (Sign) state;
+			sign.setLine(0, "Team " + name);
+			sign.setLine(1, remainingTickets + "/" + warzone.getLifePool() + " lives left");
+			sign.setLine(2, points + "/" + warzone.getScoreCap() + " pts");
+			sign.setLine(3, players.size() + "/" + warzone.getTeamCap() + " players");
+			state.update(true);
+		}
+		
+		if(warzone.getLobby() != null) {
+			warzone.getLobby().resetTeamGateSign(this);
+		}
+	}
+
+	public void resetSignMonument(){
 		int x = teamSpawn.getBlockX();
 		int y = teamSpawn.getBlockY();
 		int z = teamSpawn.getBlockZ();
@@ -223,7 +287,7 @@ public class Team {
 			warzone.getLobby().resetTeamGateSign(this);
 		}
 	}
-
+	
 	public void setVolume(Volume volume) {
 		this.volume = volume;
 	}

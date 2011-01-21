@@ -50,7 +50,7 @@ public class War extends JavaPlugin {
 	private WarBlockListener blockListener = new WarBlockListener(this);
     private Logger log;
     String name = "War";
-    String version = "0.3";
+    String version = "0.3.001";
     String versionCodeName = "Patton";
     
     private final List<Warzone> warzones = new ArrayList<Warzone>();
@@ -121,9 +121,9 @@ public class War extends JavaPlugin {
 			player.sendMessage(this.str("War is on. Please pick your battle. " +
 					"Use /warhub, /zones and /zone."));
 		} else {
-			arguments = new String[args.length - 1];
+			arguments = new String[args.length];
 			for(int i = 1; i <= arguments.length; i++) {
-				arguments[i-1] = args[i];
+				arguments[i-1] = args[i-1];
 			}
 		}
 	
@@ -442,7 +442,7 @@ public class War extends JavaPlugin {
 				}
 			}
 	
-			// /savewarzone
+			// /savezone
 			else if(command.equals("savezone")) {
 				if(!this.inAnyWarzone(player.getLocation()) && !this.inAnyWarzoneLobby(player.getLocation())) {
 					player.sendMessage(this.str("Usage: /savezone lifepool:8 teamsize:5 maxscore:7 autoassign:on outline:off ff:on " +
@@ -561,7 +561,7 @@ public class War extends JavaPlugin {
 			// /deletezone
 			else if(command.equals("deletezone")) {
 				if(!this.inAnyWarzone(player.getLocation()) && !this.inAnyWarzoneLobby(player.getLocation())) {
-					player.sendMessage(this.str("Usage: /deletewarzone. " +
+					player.sendMessage(this.str("Usage: /deletezone. " +
 							"Deletes the warzone. " +
 							"Must be in the warzone (try /zones and /zone). "));
 				} else {
@@ -691,6 +691,7 @@ public class War extends JavaPlugin {
 						player.sendMessage(this.str("Monument " + monument.getName() + " created."));
 					}
 					WarzoneMapper.save(this, warzone, false);
+					warzone.initializeZone();	// bring back team spawns etc
 				}
 			}
 			
@@ -714,7 +715,10 @@ public class War extends JavaPlugin {
 					if(monument != null) {
 						monument.getVolume().resetBlocks();
 						warzone.getMonuments().remove(monument);
+
 						WarzoneMapper.save(this, warzone, false);
+						warzone.initializeZone();	// bring back team spawns etc
+
 						player.sendMessage(this.str("Monument " + name + " removed."));
 					} else {
 						player.sendMessage(this.str("No such monument."));

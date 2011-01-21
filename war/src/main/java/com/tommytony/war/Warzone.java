@@ -449,6 +449,10 @@ public class Warzone {
 		}
 	}
 
+	public boolean hasMonument() {
+		return !monuments.isEmpty();
+	}
+
 	public boolean hasMonument(String monumentName) {
 		for(Monument monument: monuments) {
 			if(monument.getName().equals(monumentName)) {
